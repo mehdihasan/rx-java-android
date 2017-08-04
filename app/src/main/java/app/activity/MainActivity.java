@@ -52,8 +52,8 @@ public class MainActivity extends ActionBarActivity {
         bFetch.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 GithubService service = ServiceFactory.createRetrofitService(GithubService.class, GithubService.SERVICE_ENDPOINT);
-                for(String login : Data.githubList) {
-                    service.getUser(login)
+                for(String userName : Data.githubList) {
+                    service.getUser(userName)
                             .subscribeOn(Schedulers.newThread())
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(new Observer<Github>() {
