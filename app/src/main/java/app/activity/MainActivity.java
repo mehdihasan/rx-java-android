@@ -4,19 +4,22 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+
+import com.example.githubdemo.app.R;
+
 import app.Data;
 import app.adapter.CardAdapter;
 import app.model.Github;
 import app.service.GithubService;
 import app.service.ServiceFactory;
-import com.example.githubdemo.app.R;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -38,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
         /**
          * START: button set up
          */
-        Button bClear = (Button) findViewById(R.id.button_clear);
+        final Button bClear = (Button) findViewById(R.id.button_clear);
         Button bFetch = (Button) findViewById(R.id.button_fetch);
         bClear.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -51,30 +54,34 @@ public class MainActivity extends ActionBarActivity {
                 GithubService service = ServiceFactory.createRetrofitService(GithubService.class, GithubService.SERVICE_ENDPOINT);
                 for(String login : Data.githubList) {
                     service.getUser(login)
-                        .subscribeOn(Schedulers.newThread())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<Github>() {
-                            @Override
-                            public final void onCompleted() {
-                                // do nothing
-                            }
+                            .subscribeOn(Schedulers.newThread())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(new Observer<Github>() {
 
-                            @Override
-                            public final void onError(Throwable e) {
-                                Log.e("GithubDemo", e.getMessage());
-                            }
+                                @Override
+                                public void onSubscribe(@NonNull Disposable d) {
 
-                            @Override
-                            public final void onNext(Github response) {
-                                mCardAdapter.addData(response);
-                            }
-                        });
+                                }
+
+                                @Override
+                                public void onNext(@NonNull Github github) {
+                                    mCardAdapter.addData(github);
+                                    System.out.println("New data received: " + github.toString());
+                                }
+
+                                @Override
+                                public void onError(Throwable e) {
+                                    System.out.println("Error received: " + e.getMessage());
+                                }
+
+                                @Override
+                                public void onComplete() {
+                                    System.out.println("All data emitted.");
+                                }
+                            });
                 }
             }
         });
-        /**
-         * END: button set up
-         */
     }
 
     @Override

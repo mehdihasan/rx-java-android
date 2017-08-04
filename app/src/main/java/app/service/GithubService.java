@@ -1,9 +1,9 @@
 package app.service;
 
 import app.model.Github;
-import retrofit.http.GET;
-import retrofit.http.Path;
-import rx.Observable;
+import io.reactivex.Observable;
+import retrofit2.http.GET;
+import retrofit2.http.Path;
 
 public interface GithubService {
     String SERVICE_ENDPOINT = "https://api.github.com";
